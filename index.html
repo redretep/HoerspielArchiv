@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FragezeichenArchiv</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0e0e0e, #1b1b1b);
+      color: #fff;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    .player-box {
+      width: 100%;
+      flex: 1;
+      background: #181818;
+      border-radius: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    h2 { text-align: center; color: #1db954; margin-bottom: 10px; }
+    
+    /* Archive Selector Styling */
+    .archive-selector { text-align: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+    .input-group { 
+      display: flex; 
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+      justify-content: center; 
+      align-items: center; 
+      gap: 10px; 
+      margin-top: 10px; 
+    }
+    .input-group input, .input-group select {
+      padding: 10px; 
+      border-radius: 6px; 
+      border: none; 
+      outline: none;
+      background: #222; 
+      color: #fff; 
+      font-size: 16px; 
+      transition: 0.3s;
+      flex-grow: 1; /* Allow inputs/selects to grow */
+      min-width: 150px; /* Ensure minimum width for input */
+      max-width: 250px;
+    }
+    /* Style for the Select dropdown */
+    .input-group select {
+        padding-right: 30px; /* Space for the arrow */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        appearance: none; /* Remove default browser arrow */
+        -webkit-appearance: none;
+    }
+    .input-group button {
+      background: #1db954; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 16px;
+      transition: 0.3s;
+    }
+    .input-group button:hover { background: #17a74a; }
+
+    .search-bar { text-align: center; margin-bottom: 10px; }
+    .search-bar input {
+      width: 95%; padding: 10px; border-radius: 20px; border: none; outline: none;
+      background: #222; color: #fff; text-align: center; font-size: 16px; transition: 0.3s;
+    }
+    .search-bar input:focus { background: #333; box-shadow: 0 0 10px #1db954; }
+    .track-list { flex: 1; overflow-y: auto; border-radius: 10px; background: #111; padding: 10px; }
+    .track {
+      display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-bottom: 1px solid #333;
+      cursor: pointer; transition: all 0.3s ease; border-radius: 8px;
+    }
+    .track img { 
+      width: 40px; height: 40px; border-radius: 6px; object-fit: cover; 
+      /* Make sure the placeholder looks good */
+      background-color: #1db954;
+      border: 1px solid #000;
+    }
+    .track:hover { background: #222; transform: scale(1.02); }
+    .track.active { background: #333; color: #1db954; font-weight: 600; }
+    .loading {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85);
+      display: flex; justify-content: center; align-items: center; border-radius: 25px; font-size: 20px; font-weight: bold;
+      z-index: 10; flex-direction: column;
+    }
+    .spinner {
+      border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #1db954; border-radius: 50%; width: 40px; height: 40px;
+      animation: spin 1s linear infinite; margin-bottom: 10px;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .bottom-player {
+      width: 100%; background: #0f0f0f; padding: 10px; display: flex; align-items: center; justify-content: space-around;
+      border-top: 1px solid #222; position: sticky; bottom: 0;
+    }
+    .bottom-player audio { flex: 1; margin: 0 10px; }
+    .sleep-timer { display: flex; align-items: center; gap: 8px; }
+    .sleep-timer input {
+      width: 50px; padding: 5px; border-radius: 5px; border: none; background: #222; color: #fff; text-align: center;
+    }
+    .sleep-timer button, .speed-btn {
+      background: #1db954; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
+    }
+    .sleep-timer button:hover, .speed-btn:hover { background: #17a74a; }
+    #timerCountdown { font-size: 13px; color: #ccc; }
+  </style>
+</head>
+<body>
+  <div class="player-box">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Wird geladen...
+    </div>
+
+    <div class="archive-selector">
+      <h2 id="archiveTitle">Archiv: dreifragezeichen</h2>
+      <div class="input-group">
+        
+        <!-- New Preset Selector -->
+        <select id="presetSelector" onchange="loadPreset()">
+            <option value="">-- Presets --</option>
+            <option value="dreifragezeichen">Die Drei ???</option>
+            <option value="harrypotterhoerbuecher">Harry Potter Hörbücher</option>
+            <option value="alfhoerspiele">Alf Hörspiele</option>
+            <option value="tkkghoerspiele">TKKG Hörspiele</option>
+            <option value="tributevonpanemhoerbuecher">Tribute von Panem</option>
+            <option value="disneyhoerspiele">Disney Hörspiele</option>
+            <option value="ducktaleshoerspiele">Ducktales Hörspiele</option>
+            <option value="gregstagebuchhoerspiele">Gregs Tagebuch</option>
+            <option value="zurückindiezukunfthoerspiele">Zurück in die Zukunft</option>
+        </select>
+        
+        <input type="text" id="archiveIdInput" value="dreifragezeichen" placeholder="Internet Archive Collection ID">
+        <button id="loadArchiveButton" onclick="loadNewArchive()">Laden</button>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Suche nach Hörspielen..." oninput="filterTracks()">
+    </div>
+    <div class="track-list" id="trackList"></div>
+  </div>
+
+  <div class="bottom-player">
+    <audio id="audioPlayer" controls></audio>
+    <div class="sleep-timer">
+      <input type="number" id="timerInput" min="1" max="120" placeholder="10">
+      <button onclick="setSleepTimer()">Sleeptimer</button>
+      <div id="timerCountdown"></div>
+    </div>
+    <button class="speed-btn" onclick="changeSpeed()">1x</button>
+  </div>
+
+  <script>
+    const player = document.getElementById('audioPlayer');
+    const trackList = document.getElementById('trackList');
+    const loading = document.getElementById('loading');
+    const archiveTitle = document.getElementById('archiveTitle');
+    const archiveIdInput = document.getElementById('archiveIdInput');
+    const presetSelector = document.getElementById('presetSelector'); // Get the new selector
+
+    let sleepTimer, countdownInterval, files = [], speed = 1;
+
+    // Helper function to show a temporary message instead of using alert()
+    function showTempMessage(message, duration) {
+      const originalText = loading.textContent;
+      // FIX: Use explicit check instead of optional chaining assignment
+      const spinner = loading.querySelector('.spinner');
+      if (spinner) {
+          spinner.style.display = 'none';
+      }
+      loading.textContent = message;
+      loading.style.display = 'flex';
+
+      setTimeout(() => {
+        // Reset to default state if another loading hasn't started
+        if (loading.textContent === message) {
+            loading.textContent = originalText;
+            // FIX: Use explicit check instead of optional chaining assignment
+            const spinner = loading.querySelector('.spinner');
+            if (spinner) {
+                spinner.style.display = '';
+            }
+            loading.style.display = 'none';
+        }
+      }, duration);
+    }
+    
+    // Get the current collection ID from the input field
+    function getCollectionId() {
+      return archiveIdInput.value.trim();
+    }
+
+    // New function to handle preset loading
+    function loadPreset() {
+        const selectedId = presetSelector.value;
+        if (selectedId) {
+            archiveIdInput.value = selectedId;
+            loadTracks(selectedId);
+        }
+        // Reset the selector to the default placeholder after use
+        presetSelector.value = "";
+    }
+
+
+    async function loadTracks(collectionId) {
+      loading.textContent = 'Wird geladen...';
+      // FIX: Use explicit check instead of optional chaining assignment
+      const spinner = loading.querySelector('.spinner');
+      if (spinner) {
+          spinner.style.display = '';
+      }
+      loading.style.display = 'flex';
+      trackList.innerHTML = ''; // Clear previous tracks
+      files = []; // Clear file array
+
+      if (!collectionId) {
+        showTempMessage('Bitte eine Archiv-ID eingeben.', 3000);
+        return;
+      }
+
+      archiveTitle.textContent = `Archiv: ${collectionId}`;
+      player.removeAttribute('src'); // Stop playback
+
+      try {
+        const res = await fetch(`https://archive.org/metadata/${collectionId}`);
+        const data = await res.json();
+
+        if (!data || !data.files || data.files.length === 0) {
+           throw new Error('No files found or invalid ID.');
+        }
+
+        files = data.files.filter(f => f.name.endsWith('.mp3'));
+
+        if (files.length === 0) {
+            throw new Error('Keine MP3-Dateien in dieser Sammlung gefunden.');
+        }
+
+        for (const [index, file] of files.entries()) {
+          const item = document.createElement('div');
+          item.classList.add('track');
+          
+          // Clean the file name for display
+          const cleanName = file.name
+              .replace(new RegExp(collectionId, 'gi'), '')
+              .replace(/[-_\s]*die[-_\s]*drei[-_\s]*fragezeichen[-_\s]*/gi, '')
+              .replace(/\.mp3$/i, '')
+              .replace(/_/g, ' ')
+              .trim();
+          
+          const nameElem = document.createElement('span');
+          nameElem.textContent = cleanName || file.name.split('/').pop().replace(/\.mp3$/, '');
+
+          // Use a generic placeholder image since original assets are collection-specific
+          const coverImg = document.createElement('img');
+          coverImg.src = `https://placehold.co/40x40/1db954/000?text=?`; 
+
+          item.appendChild(coverImg);
+          item.appendChild(nameElem);
+          item.onclick = () => playTrack(index);
+          trackList.appendChild(item);
+        }
+
+        if (files.length > 0) playTrack(0);
+
+      } catch (e) {
+        console.error(e);
+        showTempMessage(`Fehler: Konnte Archiv ${collectionId} nicht laden. Überprüfen Sie die ID.`, 5000);
+      } finally {
+        // Only hide if a permanent error message wasn't shown
+        if (loading.textContent === 'Wird geladen...') {
+             loading.style.display = 'none';
+        }
+      }
+    }
+
+    function loadNewArchive() {
+      const collectionId = getCollectionId();
+      loadTracks(collectionId);
+    }
+
+
+    async function playTrack(i) {
+      loading.textContent = 'Wird geladen...';
+      // FIX: Use explicit check instead of optional chaining assignment
+      const spinner = loading.querySelector('.spinner');
+      if (spinner) {
+          spinner.style.display = '';
+      }
+      loading.style.display = 'flex';
+      
+      const collectionId = getCollectionId();
+      const fileName = files[i].name;
+
+      // Construct the URL dynamically
+      const url = `https://archive.org/download/${collectionId}/${fileName}`;
+      player.src = url;
+      player.play();
+      
+      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+      trackList.children[i].classList.add('active');
+      
+      // Remove loading indicator once audio is ready to play
+      player.oncanplaythrough = () => { loading.style.display = 'none'; };
+      player.onerror = () => { showTempMessage('Fehler beim Abspielen dieser Datei.', 3000); };
+    }
+
+    function setSleepTimer() {
+      const minutes = parseInt(document.getElementById('timerInput').value);
+      
+      if (!minutes || minutes <= 0) {
+         showTempMessage('Bitte gültige Minuten eingeben!', 3000);
+         return;
+      }
+      
+      clearTimeout(sleepTimer);
+      clearInterval(countdownInterval);
+      let remaining = minutes * 60;
+      
+      sleepTimer = setTimeout(() => {
+        player.pause();
+        showTempMessage('Sleeptimer beendet. Wiedergabe gestoppt.', 3000);
+        document.getElementById('timerCountdown').textContent = '';
+      }, remaining * 1000);
+
+      countdownInterval = setInterval(() => {
+        if (remaining > 0) {
+          remaining--;
+          const m = Math.floor(remaining / 60);
+          const s = remaining % 60;
+          document.getElementById('timerCountdown').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        } else clearInterval(countdownInterval);
+      }, 1000);
+    }
+
+    function changeSpeed() {
+      speed = speed === 2 ? 0.5 : speed + 0.5;
+      player.playbackRate = speed;
+      document.querySelector('.speed-btn').textContent = speed + 'x';
+    }
+
+    function filterTracks() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('.track').forEach(item => {
+        // Use textContent which includes the clean name
+        item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    // Initial load using the default value in the input field
+    loadTracks(getCollectionId());
+  </script>
+</body>
+</html>
