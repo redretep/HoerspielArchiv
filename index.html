@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HörspielArchiv</title>
+  <meta name="description" content="Sauberes, minimalistisches Archiv für Hörspiele" />
+  <style>
+    :root{
+      --bg:#0f1720; /* very dark slate */
+      --card:#0b1220; /* slightly lighter */
+      --muted:#9aa4b2;
+      --accent:#6ee7b7; /* soft mint */
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),#07101a 60%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+    }
+
+    .site{
+      width:100%;
+      max-width:980px;
+      background:var(--card);
+      border-radius:16px;
+      padding:28px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      width:48px;height:48px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),#60a5fa);
+      display:grid;place-items:center;color:#05201a;font-weight:700;font-size:18px
+    }
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+
+    a.card{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      padding:18px;
+      background:var(--glass);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.02);
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+      box-shadow: 0 2px 10px rgba(2,6,23,0.4);
+      min-height:88px;
+    }
+    a.card:hover{transform:translateY(-6px);box-shadow: 0 18px 40px rgba(2,6,23,0.6);}
+
+    .card h3{margin:0 0 6px 0;font-size:15px}
+    .card p{margin:0;color:var(--muted);font-size:13px}
+
+    .meta{
+      display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)
+    }
+    .pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.01)}
+
+    footer{margin-top:18px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;align-items:center}
+
+    /* small screens */
+    @media (max-width:420px){
+      body{padding:18px}
+      .site{padding:18px;border-radius:12px}
+      .logo{width:40px;height:40px}
+      h1{font-size:18px}
+    }
+  </style>
+</head>
+<body>
+  <main class="site" id="app">
+    <header>
+      <div class="brand">
+        <div class="logo">HörspielArchiv</div>
+        <div>
+          <h1>HörspielArchiv</h1>
+          <p class="lead">Dein Archiv für viele Hörspiele. Clicke auf eins um es zu Hören</p>
+        </div>
+      </div>
+      <nav aria-label="site actions">
+        <button id="btn-random" class="pill" title="zufälliges hörspiel">zufällig</button>
+      </nav>
+    </header>
+
+    <section>
+      <div class="grid" id="list">
+        <a class="card" href="/harry-potter">
+          <h3>harry potter (hörbuch)</h3>
+          <p>alle bücher - deutsche ausgaben. starte mit einem klick.</p>
+          <div class="meta"><span class="pill">serie</span><span>fantasy · mehrteilig</span></div>
+        </a>
+
+        <a class="card" href="/drei-fragezeichen">
+          <h3>die drei fragezeichen</h3>
+          <p>detektivhörspiele für kids und teens.</p>
+          <div class="meta"><span class="pill">serie</span><span>detektiv · kinder</span></div>
+        </a>
+
+        <a class="card" href="/tintin">
+          <h3>kommt bald</h3>
+          <p>platzhalterseite.</p>
+          <div class="meta"><span class="pill">platzhalter</span><span>abenteuer</span></div>
+        </a>
+
+        <a class="card" href="/ferien-der-wunder">
+          <h3>kommt bald</h3>
+          <p>pkatzhalter</p>
+          <div class="meta"><span class="pill">platzhalter</span><span>familie · kinder</span></div>
+        </a>
+
+        <a class="card" href="/mehr">
+          <h3>mehr hörspiele</h3>
+          <p>weitere titel folgen - diese seite ist ein platzhalter.</p>
+          <div class="meta"><span class="pill">übersicht</span><span>alle kategorien</span></div>
+        </a>
+
+      </div>
+    </section>
+
+    <footer>
+      <div>© hörspielarchiv</div>
+      <div>von pidi/redretep · 2025</div>
+    </footer>
+  </main>
+
+  <script>
+    // kleines script für zufall und progressive enhancement
+    const items = Array.from(document.querySelectorAll('#list a.card'));
+    document.getElementById('btn-random').addEventListener('click', ()=>{
+      if(items.length === 0) return;
+      const idx = Math.floor(Math.random()*items.length);
+      const href = items[idx].getAttribute('href');
+      // navigate
+      window.location.href = href;
+    });
+
+    // keyboard accessibility: enter on focused card
+    items.forEach(item => {
+      item.setAttribute('tabindex','0');
+      item.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' ') location.href = item.href;
+      });
+    });
+  </script>
+</body>
+</html>
