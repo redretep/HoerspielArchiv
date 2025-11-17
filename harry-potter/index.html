@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HarryPotterArchiv</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Cinzel', serif;
+      margin: 0;
+      padding: 20px;
+      background: url('https://i.imgur.com/8QfQG7M.jpeg') center/cover fixed;
+      color: #f5deb3;
+      text-shadow: 0 0 6px #000;
+    }
+    h1 {
+      text-align: center;
+      font-size: 42px;
+      color: #d4af37;
+      letter-spacing: 2px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    }
+    select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 2px solid #d4af37;
+      margin-bottom: 20px;
+      font-size: 18px;
+      background: #1a1a1a;
+      color: #f5deb3;
+    }
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+  </style>
+</head>
+<body>
+  <h1>HarryPotterArchiv</h1>
+  <div class="container">
+    <select id="bookSelector">
+      <option value="">Buch auswählen...</option>
+      <option value="1">Harry Potter 1</option>
+      <option value="2">Harry Potter 2</option>
+      <option value="3">Harry Potter 3</option>
+      <option value="4">Harry Potter 4</option>
+      <option value="5">Harry Potter 5</option>
+      <option value="6">Harry Potter 6</option>
+      <option value="7">Harry Potter 7</option>
+    </select>
+
+    <div id="player"></div>
+  </div>
+
+  <script>
+    const embeds = {
+      1: "https://castbox.fm/app/castbox/player/id2477025?v=8.22.11&autoplay=0",
+      2: "https://castbox.fm/app/castbox/player/id2477166?v=8.22.11&autoplay=0",
+      3: "https://castbox.fm/app/castbox/player/id2477753?v=8.22.11&autoplay=0",
+      4: "https://castbox.fm/app/castbox/player/id2478095?v=8.22.11&autoplay=0",
+      5: "https://castbox.fm/app/castbox/player/id2479291?v=8.22.11&autoplay=0",
+      6: "https://castbox.fm/app/castbox/player/id2479325?v=8.22.11&autoplay=0",
+      7: "https://castbox.fm/app/castbox/player/id2479326?v=8.22.11&autoplay=0"
+    };
+
+    const selector = document.getElementById('bookSelector');
+    const player = document.getElementById('player');
+
+    selector.addEventListener('change', () => {
+      const id = selector.value;
+      if (!id) {
+        player.innerHTML = "";
+        return;
+      }
+      player.innerHTML = `<iframe src="${embeds[id]}"></iframe>`;
+    });
+  </script>
+</body>
+</html>
